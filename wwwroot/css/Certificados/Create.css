@@ -1,0 +1,483 @@
+﻿/* =========================
+   NeoAuth - Criar Certificado Visual
+   Dimensões fixas: 2480x3508px (A4)
+   ========================= */
+
+/* ===== Layout Base ===== */
+.neo-container {
+    max-width: 1300px;
+    padding: 1rem;
+    margin: 0 auto;
+}
+
+.dashboard-title {
+    font-weight: var(--font-extrabold);
+    color: var(--text-primary);
+    letter-spacing: var(--tracking-tight);
+}
+
+.btn-logout {
+    border-radius: var(--radius-lg);
+    font-weight: var(--font-semibold);
+    transition: all var(--transition-fast);
+}
+
+    .btn-logout:hover {
+        background-color: var(--gray-100);
+    }
+
+/* ===== Cards ===== */
+.neo-card {
+    background: var(--white);
+    border-radius: 0 !important;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--shadow-md);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+    .neo-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+/* ===== Alerts ===== */
+.neoalert-success {
+    background: var(--success-soft);
+    color: var(--success-dark);
+    border-left: 4px solid var(--success);
+    border-radius: var(--radius-lg);
+    padding: 0.75rem 1rem;
+    font-weight: var(--font-medium);
+}
+
+/* ===== Formulários ===== */
+.form-label {
+    color: var(--text-secondary);
+    font-weight: var(--font-semibold);
+}
+
+.form-control, .form-select {
+    border: 2px solid var(--border-light);
+    border-radius: 0 !important;
+    transition: all var(--transition-base);
+}
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: var(--focus-ring);
+        background-color: var(--white);
+    }
+
+/* ===== Seções ===== */
+.bg-light {
+    background-color: var(--gray-50) !important;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== ÁREA DE PRÉ-VISUALIZAÇÃO DO CERTIFICADO ===== */
+.certificate-preview-area {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    position: relative;
+    overflow: hidden;
+    display: block;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    outline: none !important;
+    /* Dimensões definidas dinamicamente pelo JS */
+}
+
+/* Placeholder quando não há certificado carregado */
+.preview-placeholder {
+    color: var(--text-muted);
+    animation: fadeIn 0.3s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 450px;
+    padding: 3rem;
+}
+
+/* ⭐ Canvas - renderização do PDF - SEM bordas internas */
+.pdf-preview-canvas {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    object-fit: fill !important; /* Preenche exatamente o container */
+}
+
+/* ⭐ Imagem - fallback para PNG/JPG - SEM bordas internas */
+#certificadoVazioImg {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    object-fit: fill !important;
+    image-rendering: auto !important;
+}
+
+/* ===== CAMPOS DRAGGABLES (NOME E DATA) ===== */
+.draggable-field {
+    position: absolute;
+    cursor: move;
+    padding: 8px 12px;
+    background-color: rgba(13, 110, 253, 0.1);
+    border: 2px dashed #0d6efd;
+    border-radius: 8px;
+    min-width: 150px;
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 1000;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    width: auto !important;
+    height: auto !important;
+}
+
+    .draggable-field:hover:not(.dragging):not([data-locked="true"]) {
+        border-color: #0056b3;
+        background-color: rgba(13, 110, 253, 0.15);
+    }
+
+    .draggable-field.dragging {
+        opacity: 0.8;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        z-index: 1001;
+        cursor: grabbing !important;
+    }
+
+    /* ⭐ Campo travado após salvar configuração */
+    .draggable-field[data-locked="true"],
+    .draggable-field[style*="border-color: rgb(40, 167, 69)"] {
+        border-color: #28a745 !important;
+        background-color: rgba(40, 167, 69, 0.05) !important;
+        cursor: default !important;
+        opacity: 0.7;
+    }
+
+/* ⭐ ESTILO ESPECÍFICO PARA DATA DE EMISSÃO */
+#draggableDataEmissao {
+    background-color: rgba(40, 167, 69, 0.1) !important;
+    border: 2px dashed #28a745 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 6px 10px !important;
+    min-width: auto !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+    #draggableDataEmissao:hover:not(.dragging):not([data-locked="true"]) {
+        border-color: #1e7e34 !important;
+        background-color: rgba(40, 167, 69, 0.15) !important;
+    }
+
+    #draggableDataEmissao.dragging {
+        border-color: #1e7e34 !important;
+        background-color: rgba(40, 167, 69, 0.15) !important;
+        box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3) !important;
+    }
+
+    /* Alinhamento específico da data */
+    #draggableDataEmissao[data-align="center"] {
+        justify-content: center !important;
+    }
+
+    #draggableDataEmissao[data-align="left"] {
+        justify-content: flex-start !important;
+    }
+
+    #draggableDataEmissao[data-align="right"] {
+        justify-content: flex-end !important;
+    }
+
+/* ===== TEXTO DENTRO DOS CAMPOS DRAGGABLES ===== */
+.draggable-text {
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    color: #000000;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+    display: inline-block;
+    width: auto;
+    max-width: none;
+    text-align: center;
+    pointer-events: none;
+    line-height: 1.2;
+}
+
+/* ===== HANDLE DE ARRASTAR ===== */
+.drag-handle {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background-color: #0d6efd;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: move;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    pointer-events: none;
+}
+
+    .drag-handle i {
+        pointer-events: none;
+    }
+
+/* Handle verde para data de emissão */
+#draggableDataEmissao .drag-handle {
+    background-color: #28a745 !important;
+}
+
+    #draggableDataEmissao .drag-handle:hover {
+        background-color: #1e7e34 !important;
+    }
+
+/* Esconder handle quando campo está travado */
+.draggable-field[data-locked="true"] .drag-handle,
+.draggable-field[style*="border-color: rgb(40, 167, 69)"] .drag-handle {
+    display: none !important;
+}
+
+/* ===== 🔥 CRÍTICO: OCULTAÇÃO DURANTE CAPTURA DE PDF 🔥 ===== */
+.pdf-capture,
+.draggable-field.pdf-capture,
+#draggableNomeAluno.pdf-capture,
+#draggableDataEmissao.pdf-capture {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+    .pdf-capture .drag-handle,
+    .draggable-field.pdf-capture .drag-handle {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+
+/* ⭐ Campos opcionais arrastáveis */
+.draggable-div {
+    position: absolute;
+    cursor: move;
+    user-select: none;
+    z-index: 5;
+    white-space: nowrap;
+    transition: all var(--transition-fast);
+}
+
+    .draggable-div:hover {
+        transform: scale(1.02);
+    }
+
+    .draggable-div[data-is-editing="true"] {
+        background: rgba(255, 235, 59, 0.3);
+        border: 2px dashed #ffc107;
+        border-radius: var(--radius-sm);
+        padding: 4px 8px;
+    }
+
+/* ===== INFORMAÇÕES DE POSIÇÃO ===== */
+#positionInfo {
+    font-size: 0.875rem;
+    background-color: #e9ecef;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    margin-top: 1rem;
+    border: 1px solid var(--border-light);
+}
+
+    #positionInfo strong {
+        color: #495057;
+    }
+
+    #positionInfo span {
+        color: #0d6efd;
+        font-weight: 600;
+    }
+
+/* ===== BOTÕES ===== */
+.btn {
+    border-radius: var(--radius-lg);
+    font-weight: var(--font-semibold);
+    transition: all var(--transition-base);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border: none;
+    color: var(--white);
+}
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+    }
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success), var(--success-dark));
+    border: none;
+}
+
+.btn-outline-success:hover {
+    background-color: var(--success-soft);
+}
+
+.btn-outline-primary {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary-soft);
+        color: var(--primary-dark);
+    }
+
+/* ===== Toggle de Campos ===== */
+.show-on-certificate {
+    cursor: pointer;
+    transition: transform var(--transition-fast);
+}
+
+    .show-on-certificate:checked + label i {
+        color: var(--primary);
+        transform: scale(1.2);
+    }
+
+/* ===== Sticky Preview (Desktop) ===== */
+@media (min-width: 992px) {
+    .sticky-preview {
+        position: sticky;
+        top: 2rem;
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+    }
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 992px) {
+    .sticky-preview {
+        position: static;
+    }
+
+    .certificate-preview-area {
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .draggable-field {
+        min-width: 120px;
+        padding: 6px 10px;
+    }
+
+    .draggable-text {
+        font-size: 18px;
+    }
+
+    .drag-handle {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
+        top: -6px;
+        right: -6px;
+    }
+}
+
+/* ===== ANIMAÇÕES ===== */
+@keyframes fadeInField {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.draggable-field {
+    animation: fadeInField 0.3s ease;
+}
+
+    /* ===== ESTADOS DE FOCO E ACESSIBILIDADE ===== */
+    .draggable-field:focus-visible {
+        outline: 3px solid var(--primary);
+        outline-offset: 2px;
+    }
+
+/* ===== IMPRESSÃO ===== */
+@media print {
+    .draggable-field,
+    .drag-handle,
+    #draggableNomeAluno,
+    #draggableDataEmissao {
+        display: none !important;
+    }
+}
