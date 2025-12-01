@@ -20,40 +20,6 @@
                         </div>
                     }
 
-                    <!-- ⭐ Card de Instagram - ACIMA DO FORMULÁRIO -->
-                    <div class="instagram-card mb-4">
-                        <div class="instagram-icon">
-                            <i class="fab fa-instagram"></i>
-                        </div>
-                        <h5 class="instagram-title">
-                            <i class="fas fa-gift"></i> Ganhe um Presentinho!
-                        </h5>
-                        <p class="instagram-text">
-                            Parabéns por terminar mais um curso! 🎉
-                            <br><br>
-                            Se você enviar a foto do certificado no Instagram
-                            <a href="https://www.instagram.com/expertmindacademy"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               class="instagram-link">
-                                @@expertmindacademy
-                            </a>
-                            irei te dar um presentinho. ❤️
-                        </p>
-                        <div class="instagram-examples">
-                            <strong>💡 Exemplos de envio:</strong>
-                            <ul>
-                                <li>Certificado no quadro</li>
-                                <li>Certificado na parede</li>
-                                <li>Segurando o certificado</li>
-                                <li>Use sua criatividade!</li>
-                            </ul>
-                        </div>
-                        <p class="instagram-cta">
-                            Basta postar e marcar a gente, conto com você! 🚀
-                        </p>
-                    </div>
-
                     <form method="post" id="certificateForm">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="NomeCurso" value="@ViewBag.NomeCurso" />
